@@ -10,6 +10,15 @@ class EventController {
       this.eventService = eventService;
   }
 
+  private getPaginationAndSortingParams(req: Request) {
+    const page = parseInt(req.query.page as string) || 1;
+    const limit = parseInt(req.query.limit as string) || 5;
+    const sortByRating = req.query.sortByRating as string || 'rating';
+    const sortByDirection = req.query.sortByDirection as 'asc' | 'desc' || 'asc';
+    return { page, limit, sortByRating, sortByDirection };
+  } 
+
+
   createEvent = async (req: Request, res: Response): Promise<void> => {
     try {
       const createEventDto: CreateEventDto = req.body;
@@ -21,13 +30,13 @@ class EventController {
   }
 
 
-
   getEvents = async (req: Request, res: Response): Promise<void> => {
     try {
-      const events = await this.eventService.getEvents();
+      const { page, limit, sortByRating, sortByDirection } = this.getPaginationAndSortingParams(req);
+      const events = await this.eventService.getEvents(page, limit, sortByRating, sortByDirection);
       res.status(200).json(events);
     } catch (error: any) {
-      res.status(500).send({ error: error.message });
+      res.status(500).send({ error: error.message }); 
     }
   }
 
@@ -59,16 +68,6 @@ class EventController {
     }
   }
 
-  getEventsByPagination = async (req: Request, res: Response): Promise<void> => {
-    try {
-        const page = parseInt(req.query.page as string) || 1;
-        const limit = parseInt(req.query.limit as string) || 10;
-
-        const { events, totalPages } = await this.eventService.getEventsByPagination(page, limit);
-        res.status(200).json({ events, totalPages, currentPage: page, limit });
-    } catch (error: any) {
-        res.status(500).send({ error: error.message });
-    }
 }
 
 
@@ -81,7 +80,6 @@ class EventController {
   //     console.log(paginatedResults);
   //   }
   // )}
-
-}
+// }
 
 export default EventController;

@@ -1,11 +1,9 @@
 import mongoose from 'mongoose';
 import { CreateEventDto } from './dtos/CreateEvent.dot';
 import EventModel, { IEvent } from './models/Event';
-import { Event } from './types/response';
 
 
 
-// this event service instance shows how to create a event, get a event by id, and get all events with in-memory data
 class EventService {
   
   async getEventById(id: string): Promise<IEvent | null> {
@@ -15,39 +13,28 @@ class EventService {
   async getEventsByCity(city : string): Promise<IEvent[]> {
     return await EventModel.find({"location" : city}).exec()
   }
-  
-  async getEvents(): Promise<IEvent[]> {
-    return await EventModel.find().exec(); 
-  }
 
-  async getEventsByPagination(page: number, limit: number): Promise<{ events: IEvent[], totalPages: number }> {
-    const skip = (page - 1) * limit;
-    const totalCount = await EventModel.countDocuments().exec();
-    const events = await EventModel.find()
-                                        .skip(skip)
-                                        .limit(limit)
-                                        .exec();
-    const totalPages = Math.ceil(totalCount / limit);
-    return { events, totalPages };
-  }
+  async getEvents(page: number, limit: number, sortByRating: string, sortByDirection: string ): Promise<IEvent[]> {
+    const sortCriteria = {};
+    sortCriteria[sortByRating] = sortByDirection === 'asc'? 1 : -1;
 
+    return await EventModel.find().sort(sortCriteria).skip((page - 1) * limit).limit(limit).exec(); 
+  }
 
   async createEvent(createEventDto: CreateEventDto): Promise<IEvent> {
-    const { name, description, date, location , duration} = createEventDto;
+    const { name, description, date, location , duration, rating} = createEventDto;
     const newEvent = new EventModel({
       name,
       description,
       date: new Date(date),
       location,
-      duration
+      duration,
+      rating
     });
 
     await newEvent.save();
     return newEvent;
   }
-  
-
-    
 }
 
 export default EventService;
