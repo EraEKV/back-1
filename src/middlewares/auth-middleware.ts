@@ -9,6 +9,8 @@ export const authMiddleware = (req: Request, res: Response, next: NextFunction) 
     return res.status(401).json({ message: 'Authorization header missing' });
   }
 
+  // eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY2NjgwYTI2MjI2NzU0NTYzYTA0OTlhYSIsImVtYWlsIjoia29rZW5hb2VyYXN5bEBnbWFpbC5jb20iLCJpYXQiOjE3MTgwOTc1ODIsImV4cCI6MTcxODEwMTE4Mn0.ygbpAzat9Rj3WagJbolpwQyErGOykZdXNPfJ4uv5ZmQ
+
   const token = authHeader.split(' ')[1];
   const payload = authService.verifyJwt(token);
 
